@@ -75,12 +75,16 @@ public final class ImageFilterTask extends AsyncTask<Void, String, ResultImage> 
                 Log.i(clsName, "Iniciou processo de Benchmark");
                 benchmarkTask();
             } else if (config.getFilter().equals("Original")) {
+                Log.i(clsName, "Iniciou processo de Original");
                 originalTask();
             } else if (config.getFilter().equals("Cartoonizer")) {
+                Log.i(clsName, "Iniciou processo de Cartoonizer");
                 cartoonizerTask();
             } else if (config.getFilter().equals("Sharpen")) {
+                Log.i(clsName, "Iniciou processo de Sharpen");
                 sharpenTask();
             } else {
+                Log.i(clsName, "Iniciou processo de ELSE");
                 filterMapTask();
             }
             return result;

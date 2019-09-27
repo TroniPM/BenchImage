@@ -111,6 +111,7 @@ public final class MposFramework {
                     }
 
                     if (remoteSupport) {
+                        Log.i("MPOS FRAMEWORK", "Vai jogar pra cloudlet");
                         f.set(activity, ProxyHandler.newInstance(anno.value(), f.getType()));
                     } else {
                         throw new InstantiationException("The injection required a interface with remotable annotation!");

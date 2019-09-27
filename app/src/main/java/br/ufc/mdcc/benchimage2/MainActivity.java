@@ -56,7 +56,7 @@ import br.ufc.mdcc.mpos.util.TaskResultAdapter;
 /**
  * @author Philipp
  */
-@MposConfig(endpointSecondary = "54.94.172.61")
+@MposConfig(endpointSecondary = "18.228.151.23")
 public final class MainActivity extends Activity {
     private final String clsName = MainActivity.class.getName();
 
@@ -202,11 +202,15 @@ public final class MainActivity extends Activity {
         if ((config.getFilter().equals("Cartoonizer") || config.getFilter().equals("Benchmark")) && vmSize <= 64 && (config.getSize().equals("8MP") || config.getSize().equals("4MP"))) {
             dialogSupportFilter();
         } else {
+
             if (config.getLocal().equals("Local")) {
+                Log.i(clsName, "TIPO: " + config.getLocal());
                 new ImageFilterTask(getApplication(), filterLocal, config, taskResultAdapter).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } else if (config.getLocal().equals("Cloudlet")) {
+                Log.i(clsName, "TIPO: " + config.getLocal());
                 new ImageFilterTask(getApplication(), cloudletFilter, config, taskResultAdapter).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } else {
+                Log.i(clsName, "<ELSE> TIPO: " + config.getLocal());
                 new ImageFilterTask(getApplication(), internetFilter, config, taskResultAdapter).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         }
