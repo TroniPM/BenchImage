@@ -18,6 +18,7 @@ package br.ufc.mdcc.benchimage2.dao.model;
 import java.util.Date;
 
 import android.graphics.Bitmap;
+
 import br.ufc.mdcc.mpos.net.rpc.model.RpcProfile;
 
 /**
@@ -28,6 +29,8 @@ public final class ResultImage {
     private Date date;
 
     private long totalTime;
+    private long battery_before;
+    private long battery_after;
 
     private Bitmap bitmap;
     private AppConfiguration config;
@@ -49,6 +52,22 @@ public final class ResultImage {
 
     public final void setId(int id) {
         this.id = id;
+    }
+
+    public final long getBatteryBefore() {
+        return battery_before;
+    }
+
+    public final void setBatteryBefore(long battery_before) {
+        this.battery_before = battery_before;
+    }
+
+    public final long getBatteryAfter() {
+        return battery_after;
+    }
+
+    public final void setBatteryAfter(long battery_after) {
+        this.battery_after = battery_after;
     }
 
     public final Date getDate() {
@@ -93,6 +112,6 @@ public final class ResultImage {
 
     @Override
     public String toString() {
-        return "ResultImage [id=" + id + ", date=" + date + ", totalTime=" + totalTime + ", config=" + config + ", debug=" + rpcProfile + "]";
+        return "ResultImage [id=" + id + ", battery_before=" + battery_before + ", battery_after=" + battery_after + ", date=" + date + ", totalTime=" + totalTime + ", config=" + config + ", debug=" + rpcProfile + "]";
     }
 }
