@@ -20,11 +20,16 @@ import java.io.File;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Process;
@@ -37,6 +42,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 
@@ -232,6 +238,7 @@ public final class MainActivity extends Activity {
         Spinner spinnerFilter = (Spinner) findViewById(R.id.spin_filter);
         Spinner spinnerSize = (Spinner) findViewById(R.id.spin_size);
         Spinner spinnerLocal = (Spinner) findViewById(R.id.spin_local);
+        Spinner spinnerQuantity = (Spinner) findViewById(R.id.spin_quantity);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.spinner_img, R.layout.spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -250,6 +257,11 @@ public final class MainActivity extends Activity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSize.setAdapter(adapter);
         spinnerSize.setSelection(4);
+
+        adapter = ArrayAdapter.createFromResource(this, R.array.spinner_quantity, R.layout.spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerQuantity.setAdapter(adapter);
+        spinnerQuantity.setSelection(0);
     }
 
     private void configureStatusViewOnTaskStart() {
@@ -364,28 +376,38 @@ public final class MainActivity extends Activity {
         @Override
         public void completedTask(ResultImage obj) {
             if (obj != null) {
+                final String LB = "\r\n";
+                String log = "." + LB;
                 ImageView imageView = (ImageView) findViewById(R.id.imageView);
                 imageView.setImageBitmap(obj.getBitmap());
 
                 TextView tv_tamanho = (TextView) findViewById(R.id.text_size);
                 tv_tamanho.setText("Tamanho/Foto: " + config.getSize() + "/" + photoName);
+                log += "Tamanho/Foto: " + config.getSize() + "/" + photoName + LB;
 
                 TextView tv_execucao = (TextView) findViewById(R.id.text_exec);
                 if (obj.getTotalTime() != 0) {
                     double segundos = obj.getTotalTime() / 1000.0;
                     tv_execucao.setText("Tempo de\nExecução: " + String.format("%.3f", segundos) + "s");
+                    log += "Tempo de Execução: " + String.format("%.3f", segundos) + "s" + LB;
                 } else {
                     tv_execucao.setText("Tempo de\nExecução: 0s");
+                    log += "Tempo de Execução: 0s" + LB;
                 }
                 if (obj.getConfig().getFilter().equals("Benchmark")) {
                     double segundos = obj.getTotalTime() / 1000.0;
                     tv_execucao.setText("Tempo de\nExecução: " + String.format("%.3f", segundos) + "s");
+                    log += "Tempo de Execução: " + String.format("%.3f", segundos) + "s" + LB;
                 }
+
+                Log.i(clsName + " EXECUÇÃO", log);
+
             } else {
                 TextView tv_status = (TextView) findViewById(R.id.text_status);
                 tv_status.setText("Status: Algum Error na transmissão!");
             }
             buttonStatusChange(R.id.button_execute, true, "Inicia");
+            Log.i(clsName + " EXECUÇÃO", "-- Finalizando execução -- ");
         }
 
         @Override
