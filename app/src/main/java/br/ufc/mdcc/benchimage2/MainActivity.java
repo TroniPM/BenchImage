@@ -372,6 +372,44 @@ public final class MainActivity extends Activity {
         return "BenchImageOutput";
     }
 
+    /**
+     * Chamar esse método para realizar alguma coisa após todas as execuções
+     *
+     * @param params
+     */
+    public void callbackEnding(Object... params) {
+        //batteryLevel();
+    }
+
+    public long batteryLevel() {
+        Intent intent = this.getApplicationContext().registerReceiver(null,
+                new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+        int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100);
+
+        boolean isPresent = intent.getBooleanExtra("present", false);
+
+        Bundle bundle = intent.getExtras();
+        String str = bundle.toString();
+        Log.i(clsName + " EXECUÇÃO" + " Battery Info", str);
+
+        if (isPresent) {
+            int percent = (level * 100) / scale;
+
+            Log.i(clsName + " EXECUÇÃO", "Technology = " + bundle.getString("technology"));
+            Log.i(clsName + " EXECUÇÃO", "Voltage = " + bundle.getInt("voltage") + "mV");
+            Log.i(clsName + " EXECUÇÃO", "Temperature = " + (bundle.getInt("temperature") / 10.0));
+            Log.i(clsName + " EXECUÇÃO", "Current = " + bundle.getInt("current_avg"));
+            Log.i(clsName + " EXECUÇÃO", "Percentage = " + percent + "%");
+
+            return bundle.getInt("voltage");
+        } else {
+            Log.i(clsName + " EXECUÇÃO", "Battery not present!!!");
+
+            return 0;
+        }
+    }
+
     private TaskResultAdapter<ResultImage> taskResultAdapter = new TaskResultAdapter<ResultImage>() {
         @Override
         public void completedTask(ResultImage obj) {
