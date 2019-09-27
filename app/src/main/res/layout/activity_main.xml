@@ -142,28 +142,70 @@
                 android:textColor="#AAAAAA"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
 
-        </LinearLayout>
-        
-        <LinearLayout
-            android:layout_width="match_parent"
+    </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:gravity="center" >
+
+        <Spinner
+            android:id="@+id/spin_size"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:gravity="center" >
+            android:layout_weight=".5"
+            android:textColor="@android:color/white" />
 
-            <Spinner
-                android:id="@+id/spin_size"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight=".5"
-                android:textColor="@android:color/white" />
+        <Spinner
+            android:id="@+id/spin_local"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight=".5"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
 
-            <Spinner
-                android:id="@+id/spin_local"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight=".5"
-                android:textColor="@android:color/white" />
-        </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:gravity="center" >
+
+        <TextView
+            android:id="@+id/TextViewDUMMY"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quantidade"
+            android:layout_weight=".5"
+            android:textSize="11sp"
+            android:textColor="#AAAAAA"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="11sp"
+            android:layout_gravity="left"
+            android:textColor="#AAAAAA"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:gravity="center" >
+        <Spinner
+            android:id="@+id/spin_quantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@android:color/white" />
     </LinearLayout>
 
     <LinearLayout
