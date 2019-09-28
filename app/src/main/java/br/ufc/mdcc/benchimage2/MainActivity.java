@@ -17,11 +17,8 @@ package br.ufc.mdcc.benchimage2;
 
 import java.io.File;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Application;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -81,6 +78,7 @@ public final class MainActivity extends Activity {
     private boolean quit;
 
     public static long tempoTotalUI = 0;
+    public static boolean semaforo = true;
 
     public static boolean hasPermissions(Context context, String... permissions) {
         if (context != null && permissions != null) {
@@ -118,8 +116,6 @@ public final class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        this.registerReceiver(this.batteryInfo, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-
         requestAllPermissionsAtOnce();
 
         setContentView(R.layout.activity_main);
@@ -219,8 +215,6 @@ public final class MainActivity extends Activity {
         }
 
     }
-
-    public static boolean semaforo = true;
 
     private void configureButton() {
         Button but = (Button) findViewById(R.id.button_execute);
