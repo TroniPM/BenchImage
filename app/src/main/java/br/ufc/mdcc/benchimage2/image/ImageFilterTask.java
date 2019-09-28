@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -29,6 +30,7 @@ import android.os.AsyncTask;
 import android.os.PowerManager;
 import android.util.Log;
 
+import br.ufc.mdcc.benchimage2.MainActivity;
 import br.ufc.mdcc.benchimage2.dao.ResultDao;
 import br.ufc.mdcc.benchimage2.dao.model.AppConfiguration;
 import br.ufc.mdcc.benchimage2.dao.model.ResultImage;
@@ -45,6 +47,7 @@ public final class ImageFilterTask extends AsyncTask<Void, String, ResultImage> 
     private final String clsName = ImageFilterTask.class.getName();
     private PowerManager.WakeLock wakeLock;
 
+    private MainActivity mainActivity;
     private Context context;
     private Filter filter;
     private AppConfiguration config;
@@ -53,11 +56,15 @@ public final class ImageFilterTask extends AsyncTask<Void, String, ResultImage> 
     private ResultDao dao;
     private ResultImage result = null;
 
-    public ImageFilterTask(Context context, Filter filter, AppConfiguration config, TaskResultAdapter<ResultImage> taskResult) {
-        this.context = context;
+    private long batteryBefore;
+
+    public ImageFilterTask(MainActivity mainActivity, Filter filter, AppConfiguration config, TaskResultAdapter<ResultImage> taskResult, long batteryBefore) {
+        this.mainActivity = mainActivity;
+        this.context = mainActivity.getApplication();
         this.filter = filter;
         this.config = config;
         this.taskResult = taskResult;
+        this.batteryBefore = batteryBefore;
 
         result = new ResultImage(config);
         dao = new ResultDao(context);
@@ -75,16 +82,12 @@ public final class ImageFilterTask extends AsyncTask<Void, String, ResultImage> 
                 Log.i(clsName, "Iniciou processo de Benchmark");
                 benchmarkTask();
             } else if (config.getFilter().equals("Original")) {
-                Log.i(clsName, "Iniciou processo de Original");
                 originalTask();
             } else if (config.getFilter().equals("Cartoonizer")) {
-                Log.i(clsName, "Iniciou processo de Cartoonizer");
                 cartoonizerTask();
             } else if (config.getFilter().equals("Sharpen")) {
-                Log.i(clsName, "Iniciou processo de Sharpen");
                 sharpenTask();
             } else {
-                Log.i(clsName, "Iniciou processo de ELSE");
                 filterMapTask();
             }
             return result;
@@ -189,6 +192,9 @@ public final class ImageFilterTask extends AsyncTask<Void, String, ResultImage> 
         result.setBitmap(decodeSampledBitmapFromResource(context, new FileInputStream(fileSaved), config.getSize()));
         result.setRpcProfile(MposFramework.getInstance().getEndpointController().rpcProfile);
 
+        result.setBatteryBefore(batteryBefore);
+        result.setBatteryAfter(mainActivity.batteryLevel());
+
         dao.add(result);
 
         publishProgress("Terminou Processamento!");
@@ -216,6 +222,9 @@ public final class ImageFilterTask extends AsyncTask<Void, String, ResultImage> 
         result.setBitmap(decodeSampledBitmapFromResource(context, new FileInputStream(fileSaved), config.getSize()));
         result.setRpcProfile(MposFramework.getInstance().getEndpointController().rpcProfile);
 
+        result.setBatteryBefore(batteryBefore);
+        result.setBatteryAfter(mainActivity.batteryLevel());
+
         dao.add(result);
 
         publishProgress("Sharpen Completo!");
@@ -237,6 +246,9 @@ public final class ImageFilterTask extends AsyncTask<Void, String, ResultImage> 
         result.setTotalTime(System.currentTimeMillis() - initialTime);
         result.setBitmap(decodeSampledBitmapFromResource(context, new FileInputStream(fileSaved), config.getSize()));
         result.setRpcProfile(MposFramework.getInstance().getEndpointController().rpcProfile);
+
+        result.setBatteryBefore(batteryBefore);
+        result.setBatteryAfter(mainActivity.batteryLevel());
 
         dao.add(result);
 
@@ -285,6 +297,9 @@ public final class ImageFilterTask extends AsyncTask<Void, String, ResultImage> 
         result.setTotalTime(totalTime);
         result.setBitmap(decodeSampledBitmapFromResource(context, new FileInputStream(fileSaved), "0.3MP"));
         result.getConfig().setSize("Todos");
+
+        result.setBatteryBefore(batteryBefore);
+        result.setBatteryAfter(mainActivity.batteryLevel());
 
         dao.add(result);
         publishProgress("Benchmark Completo!");

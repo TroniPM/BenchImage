@@ -80,6 +80,8 @@ public final class MainActivity extends Activity {
 
     private boolean quit;
 
+    public static long tempoTotalUI = 0;
+
     public static boolean hasPermissions(Context context, String... permissions) {
         if (context != null && permissions != null) {
             for (String permission : permissions) {
@@ -116,6 +118,7 @@ public final class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        this.registerReceiver(this.batteryInfo, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 
         requestAllPermissionsAtOnce();
 
@@ -133,7 +136,7 @@ public final class MainActivity extends Activity {
         configureStatusView("Status: Sem Atividade");
 
         createDirOutput();
-        processImage();
+        processImage(config, filterLocal, cloudletFilter, internetFilter, 0);
 
         Log.i(clsName, "Iniciou PicFilter");
     }
@@ -199,38 +202,108 @@ public final class MainActivity extends Activity {
         alertDialogBuilder.create().show();
     }
 
-    private void processImage() {
-        getConfigFromSpinner();
-        configureStatusViewOnTaskStart();
-
+    private void processImage(AppConfiguration config, Filter filterLocal, CloudletFilter cloudletFilter,
+                              InternetFilter internetFilter, long batteryBefore) {
         System.gc();
 
         if ((config.getFilter().equals("Cartoonizer") || config.getFilter().equals("Benchmark")) && vmSize <= 64 && (config.getSize().equals("8MP") || config.getSize().equals("4MP"))) {
             dialogSupportFilter();
         } else {
-
             if (config.getLocal().equals("Local")) {
-                Log.i(clsName, "TIPO: " + config.getLocal());
-                new ImageFilterTask(getApplication(), filterLocal, config, taskResultAdapter).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                new ImageFilterTask(this, filterLocal, config, taskResultAdapter, batteryBefore).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } else if (config.getLocal().equals("Cloudlet")) {
-                Log.i(clsName, "TIPO: " + config.getLocal());
-                new ImageFilterTask(getApplication(), cloudletFilter, config, taskResultAdapter).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                new ImageFilterTask(this, cloudletFilter, config, taskResultAdapter, batteryBefore).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } else {
-                Log.i(clsName, "<ELSE> TIPO: " + config.getLocal());
-                new ImageFilterTask(getApplication(), internetFilter, config, taskResultAdapter).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                new ImageFilterTask(this, internetFilter, config, taskResultAdapter, batteryBefore).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         }
+
     }
+
+    public static boolean semaforo = true;
 
     private void configureButton() {
         Button but = (Button) findViewById(R.id.button_execute);
         but.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-                buttonStatusChange(R.id.button_execute, false, "Processando");
-                processImage();
+                MainActivity.this.exec();
             }
         });
+    }
+
+    public void exec() {
+        tempoTotalUI = 0;
+        buttonStatusChange(R.id.button_execute, false, "Processando");
+        setSpinnersState(false);
+        Spinner spinnerQuantity = (Spinner) findViewById(R.id.spin_quantity);
+        String aux = spinnerQuantity.getSelectedItem().toString();
+        final int qtd = Integer.parseInt(aux);
+
+        getConfigFromSpinner();
+        configureStatusViewOnTaskStart();
+
+        Thread t = new ThreadB(MainActivity.this, config, qtd, filterLocal, cloudletFilter, internetFilter);
+        t.start();
+    }
+
+    class ThreadB extends Thread {
+        private MainActivity mainActivity;
+        private AppConfiguration config;
+        private int qtd;
+        private Filter filterLocal;
+        private CloudletFilter cloudletFilter;
+        private InternetFilter internetFilter;
+
+
+        public ThreadB(MainActivity mainActivity, AppConfiguration config, int qtd,
+                       Filter filterLocal, CloudletFilter cloudletFilter, InternetFilter internetFilter) {
+            this.mainActivity = mainActivity;
+            this.config = config;
+            this.qtd = qtd;
+            this.filterLocal = filterLocal;
+            this.cloudletFilter = cloudletFilter;
+            this.internetFilter = internetFilter;
+        }
+
+        @Override
+        public void run() {
+            int i = 0;
+
+            while (true) {
+                if (MainActivity.semaforo) {
+                    if (i < qtd) {
+                        MainActivity.semaforo = false;
+
+                        final int INDICE = i + 1;
+                        final int QUANTIDADE = qtd;
+
+                        Log.i(clsName + " EXECUÇÃO", "Vai rodar pela " + INDICE + "º vez");
+                        mainActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(mainActivity, "Etapa: " + INDICE + "/" + QUANTIDADE, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        long batteryBefore = mainActivity.batteryLevel();
+
+                        mainActivity.processImage(config, filterLocal, cloudletFilter, internetFilter, batteryBefore);
+                        i++;
+                    } else if (i == qtd) {
+                        break;
+                    }
+                }
+            }
+
+            mainActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mainActivity.buttonStatusChange(R.id.button_execute, true, "Inicia");
+                    mainActivity.setSpinnersState(true);
+                    mainActivity.callbackEnding();
+                }
+            });
+        }
     }
 
     private void configureSpinner() {
@@ -327,6 +400,7 @@ public final class MainActivity extends Activity {
         alertDialogBuilder.create().show();
 
         buttonStatusChange(R.id.button_execute, true, "Inicia");
+        setSpinnersState(true);
         TextView tv_status = (TextView) findViewById(R.id.text_status);
         tv_status.setText("Status: Requisição anterior não suporta Filtro!");
     }
@@ -335,6 +409,19 @@ public final class MainActivity extends Activity {
         Button but = (Button) findViewById(id);
         but.setEnabled(state);
         but.setText(text);
+    }
+
+    private void setSpinnersState(boolean flag) {
+        spinnerStatusChange(R.id.spin_image, flag);
+        spinnerStatusChange(R.id.spin_filter, flag);
+        spinnerStatusChange(R.id.spin_size, flag);
+        spinnerStatusChange(R.id.spin_local, flag);
+        spinnerStatusChange(R.id.spin_quantity, flag);
+    }
+
+    private void spinnerStatusChange(int id, boolean state) {
+        Spinner spinner = (Spinner) findViewById(id);
+        spinner.setEnabled(state);
     }
 
     private String photoNameToFileName(String name) {
@@ -379,6 +466,9 @@ public final class MainActivity extends Activity {
      */
     public void callbackEnding(Object... params) {
         //batteryLevel();
+        TextView tv_execucao = (TextView) findViewById(R.id.text_exec);
+        double segundos = MainActivity.tempoTotalUI / 1000.0;
+        tv_execucao.setText("Tempo de\nExecução: " + String.format("%.3f", segundos) + "s");
     }
 
     public long batteryLevel() {
@@ -439,13 +529,13 @@ public final class MainActivity extends Activity {
                 }
 
                 Log.i(clsName + " EXECUÇÃO", log);
-
+                MainActivity.tempoTotalUI += obj.getTotalTime();
             } else {
                 TextView tv_status = (TextView) findViewById(R.id.text_status);
                 tv_status.setText("Status: Algum Error na transmissão!");
             }
-            buttonStatusChange(R.id.button_execute, true, "Inicia");
             Log.i(clsName + " EXECUÇÃO", "-- Finalizando execução -- ");
+            MainActivity.semaforo = true;
         }
 
         @Override
