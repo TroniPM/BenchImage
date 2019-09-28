@@ -25,13 +25,13 @@ import android.database.sqlite.SQLiteOpenHelper;
  * @author Philipp
  */
 public final class DatabaseManager extends SQLiteOpenHelper {
-	private static final int DATABASE_VERSION = 5;
+	private static final int DATABASE_VERSION = 6;
 
 	private final ArrayList<String> tabelas = new ArrayList<String>(1);
 
 	public DatabaseManager(Context con) {
 		super(con, "app.db", null, DATABASE_VERSION);
-		tabelas.add("CREATE TABLE result (id INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL, photo_name TEXT NOT NULL, filter_name TEXT NOT NULL, local TEXT NOT NULL, photo_size TEXT NOT NULL, " + "execution_cpu_time INTEGER NOT NULL, download_time INTEGER NOT NULL, upload_time INTEGER NOT NULL, total_time INTEGER NOT NULL, " + "download_size TEXT NOT NULL, upload_size TEXT NOT NULL, date DATETIME NOT NULL) ");
+		tabelas.add("CREATE TABLE result (id INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL, photo_name TEXT NOT NULL, filter_name TEXT NOT NULL, local TEXT NOT NULL, photo_size TEXT NOT NULL, " + "execution_cpu_time INTEGER NOT NULL, download_time INTEGER NOT NULL, upload_time INTEGER NOT NULL, total_time INTEGER NOT NULL, " + "download_size TEXT NOT NULL, upload_size TEXT NOT NULL, date DATETIME NOT NULL, battery_before TEXT NOT NULL, battery_after TEXT NOT NULL) ");
 	}
 
 	@Override
