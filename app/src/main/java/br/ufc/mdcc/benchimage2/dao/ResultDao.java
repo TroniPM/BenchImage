@@ -34,118 +34,128 @@ import br.ufc.mdcc.mpos.net.rpc.model.RpcProfile;
  * @author Philipp
  */
 public final class ResultDao extends Dao {
-	private final String pattern = "dd-MM-yyyy HH:mm:ss";
-	private final DateFormat dateFormat = new SimpleDateFormat(pattern, Locale.US);
-	private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern, Locale.US);
+    private final String pattern = "dd-MM-yyyy HH:mm:ss";
+    private final DateFormat dateFormat = new SimpleDateFormat(pattern, Locale.US);
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern, Locale.US);
 
-	private final String TABLE_NAME = "result";
+    private final String TABLE_NAME = "result";
 
-	// FIELD
-	private final String F_ID = "id";
-	private final String F_PHOTO_NAME = "photo_name";
-	private final String F_FILTER_NAME = "filter_name";
-	private final String F_LOCAL = "local";
-	private final String F_SIZE = "photo_size";
-	private final String F_EXECUTION_CPU_TIME = "execution_cpu_time";
-	private final String F_UPLOAD_TIME = "upload_time";
-	private final String F_DOWNLOAD_TIME = "download_time";
-	private final String F_TOTAL_TIME = "total_time";
-	private final String F_DOWN_SIZE = "download_size";
-	private final String F_UP_SIZE = "upload_size";
-	private final String F_DATE = "date";
+    // FIELD
+    private final String F_ID = "id";
+    private final String F_PHOTO_NAME = "photo_name";
+    private final String F_FILTER_NAME = "filter_name";
+    private final String F_LOCAL = "local";
+    private final String F_SIZE = "photo_size";
+    private final String F_EXECUTION_CPU_TIME = "execution_cpu_time";
+    private final String F_UPLOAD_TIME = "upload_time";
+    private final String F_DOWNLOAD_TIME = "download_time";
+    private final String F_TOTAL_TIME = "total_time";
+    private final String F_DOWN_SIZE = "download_size";
+    private final String F_UP_SIZE = "upload_size";
+    private final String F_DATE = "date";
+    private final String F_BATTERY_BEFORE = "battery_before";
+    private final String F_BATTERY_AFTER = "battery_after";
 
-	public ResultDao(Context con) {
-		super(con);
-	}
+    public ResultDao(Context con) {
+        super(con);
+    }
 
-	public void add(ResultImage results) {
-		openDatabase();
+    public void add(ResultImage results) {
+        openDatabase();
 
-		ContentValues cv = new ContentValues();
+        ContentValues cv = new ContentValues();
 
-		cv.put(F_PHOTO_NAME, results.getConfig().getImage());
-		cv.put(F_FILTER_NAME, results.getConfig().getFilter());
-		cv.put(F_LOCAL, results.getConfig().getLocal());
-		cv.put(F_SIZE, results.getConfig().getSize());
+        cv.put(F_PHOTO_NAME, results.getConfig().getImage());
+        cv.put(F_FILTER_NAME, results.getConfig().getFilter());
+        cv.put(F_LOCAL, results.getConfig().getLocal());
+        cv.put(F_SIZE, results.getConfig().getSize());
 
-		cv.put(F_EXECUTION_CPU_TIME, results.getRpcProfile().getExecutionCpuTime());
-		cv.put(F_UPLOAD_TIME, results.getRpcProfile().getUploadTime());
-		cv.put(F_DOWNLOAD_TIME, results.getRpcProfile().getDonwloadTime());
-		cv.put(F_TOTAL_TIME, results.getTotalTime());
-		cv.put(F_DOWN_SIZE, results.getRpcProfile().getDownloadSize());
-		cv.put(F_UP_SIZE, results.getRpcProfile().getUploadSize());
+        cv.put(F_EXECUTION_CPU_TIME, results.getRpcProfile().getExecutionCpuTime());
+        cv.put(F_UPLOAD_TIME, results.getRpcProfile().getUploadTime());
+        cv.put(F_DOWNLOAD_TIME, results.getRpcProfile().getDonwloadTime());
+        cv.put(F_TOTAL_TIME, results.getTotalTime());
+        cv.put(F_DOWN_SIZE, results.getRpcProfile().getDownloadSize());
+        cv.put(F_UP_SIZE, results.getRpcProfile().getUploadSize());
 
-		cv.put(F_DATE, dateFormat.format(results.getDate()));
+        cv.put(F_DATE, dateFormat.format(results.getDate()));
 
-		database.insert(TABLE_NAME, null, cv);
+        cv.put(F_BATTERY_BEFORE, results.getBatteryBefore());
+        cv.put(F_BATTERY_AFTER, results.getBatteryAfter());
 
-		closeDatabase();
-	}
+        database.insert(TABLE_NAME, null, cv);
 
-	public ArrayList<ResultImage> getAll() throws JSONException, ParseException {
-		return queryResultImage("SELECT * FROM " + TABLE_NAME);
-	}
+        closeDatabase();
+    }
 
-	private ArrayList<ResultImage> queryResultImage(String sql) throws JSONException, ParseException {
-		openDatabase();
+    public ArrayList<ResultImage> getAll() throws JSONException, ParseException {
+        return queryResultImage("SELECT * FROM " + TABLE_NAME);
+    }
 
-		Cursor cursor = database.rawQuery(sql, null);
+    private ArrayList<ResultImage> queryResultImage(String sql) throws JSONException, ParseException {
+        openDatabase();
 
-		ArrayList<ResultImage> lista = new ArrayList<ResultImage>();
+        Cursor cursor = database.rawQuery(sql, null);
 
-		// obtem todos os indices das colunas da tabela
-		int idx_id = cursor.getColumnIndex(F_ID);
-		int idx_date = cursor.getColumnIndex(F_DATE);
+        ArrayList<ResultImage> lista = new ArrayList<ResultImage>();
 
-		int idx_photo_name = cursor.getColumnIndex(F_PHOTO_NAME);
-		int idx_filter_name = cursor.getColumnIndex(F_FILTER_NAME);
-		int idx_local = cursor.getColumnIndex(F_LOCAL);
-		int idx_size = cursor.getColumnIndex(F_SIZE);
+        // obtem todos os indices das colunas da tabela
+        int idx_id = cursor.getColumnIndex(F_ID);
+        int idx_date = cursor.getColumnIndex(F_DATE);
 
-		int idx_cpu_time = cursor.getColumnIndex(F_EXECUTION_CPU_TIME);
-		int idx_up_time = cursor.getColumnIndex(F_UPLOAD_TIME);
-		int idx_down_time = cursor.getColumnIndex(F_DOWNLOAD_TIME);
-		int idx_total_time = cursor.getColumnIndex(F_TOTAL_TIME);
-		int idx_down_size = cursor.getColumnIndex(F_DOWN_SIZE);
-		int idx_up_size = cursor.getColumnIndex(F_UP_SIZE);
+        int idx_photo_name = cursor.getColumnIndex(F_PHOTO_NAME);
+        int idx_filter_name = cursor.getColumnIndex(F_FILTER_NAME);
+        int idx_local = cursor.getColumnIndex(F_LOCAL);
+        int idx_size = cursor.getColumnIndex(F_SIZE);
 
-		if (cursor != null && cursor.moveToFirst()) {
-			do {
-				ResultImage result = new ResultImage();
-				result.setId(cursor.getInt(idx_id));
-				result.setDate(simpleDateFormat.parse(cursor.getString(idx_date)));
-				result.setTotalTime(cursor.getLong(idx_total_time));
+        int idx_cpu_time = cursor.getColumnIndex(F_EXECUTION_CPU_TIME);
+        int idx_up_time = cursor.getColumnIndex(F_UPLOAD_TIME);
+        int idx_down_time = cursor.getColumnIndex(F_DOWNLOAD_TIME);
+        int idx_total_time = cursor.getColumnIndex(F_TOTAL_TIME);
+        int idx_down_size = cursor.getColumnIndex(F_DOWN_SIZE);
+        int idx_up_size = cursor.getColumnIndex(F_UP_SIZE);
+        int idx_battery_before = cursor.getColumnIndex(F_BATTERY_BEFORE);
+        int idx_battery_after = cursor.getColumnIndex(F_BATTERY_AFTER);
 
-				AppConfiguration config = new AppConfiguration();
-				config.setImage(cursor.getString(idx_photo_name));
-				config.setFilter(cursor.getString(idx_filter_name));
-				config.setLocal(cursor.getString(idx_local));
-				config.setSize(cursor.getString(idx_size));
-				result.setConfig(config);
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                ResultImage result = new ResultImage();
+                result.setId(cursor.getInt(idx_id));
+                result.setDate(simpleDateFormat.parse(cursor.getString(idx_date)));
+                result.setTotalTime(cursor.getLong(idx_total_time));
 
-				RpcProfile profile = new RpcProfile();
-				profile.setDonwloadTime(cursor.getLong(idx_down_time));
-				profile.setDownloadSize(cursor.getInt(idx_down_size));
-				profile.setUploadTime(cursor.getLong(idx_up_time));
-				profile.setUploadSize(cursor.getInt(idx_up_size));
-				profile.setExecutionCpuTime(cursor.getLong(idx_cpu_time));
-				result.setRpcProfile(profile);
+                result.setBatteryBefore(cursor.getLong(idx_battery_before));
+                result.setBatteryAfter(cursor.getLong(idx_battery_after));
 
-				lista.add(result);
-			} while (cursor.moveToNext());
-		}
+                AppConfiguration config = new AppConfiguration();
+                config.setImage(cursor.getString(idx_photo_name));
+                config.setFilter(cursor.getString(idx_filter_name));
+                config.setLocal(cursor.getString(idx_local));
+                config.setSize(cursor.getString(idx_size));
+                result.setConfig(config);
 
-		cursor.close();
-		closeDatabase();
+                RpcProfile profile = new RpcProfile();
+                profile.setDonwloadTime(cursor.getLong(idx_down_time));
+                profile.setDownloadSize(cursor.getInt(idx_down_size));
+                profile.setUploadTime(cursor.getLong(idx_up_time));
+                profile.setUploadSize(cursor.getInt(idx_up_size));
+                profile.setExecutionCpuTime(cursor.getLong(idx_cpu_time));
+                result.setRpcProfile(profile);
 
-		return lista;
-	}
+                lista.add(result);
+            } while (cursor.moveToNext());
+        }
 
-	public void clean() {
-		openDatabase();
+        cursor.close();
+        closeDatabase();
 
-		database.delete(TABLE_NAME, null, null);
+        return lista;
+    }
 
-		closeDatabase();
-	}
+    public void clean() {
+        openDatabase();
+
+        database.delete(TABLE_NAME, null, null);
+
+        closeDatabase();
+    }
 }

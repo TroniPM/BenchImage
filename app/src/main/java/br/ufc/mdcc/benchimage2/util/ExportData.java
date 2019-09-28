@@ -75,7 +75,7 @@ public final class ExportData extends AsyncTask<Void, Void, Void> {
 
             ArrayList<ResultImage> results = dao.getAll();
 
-            writer.println("id;date;photo_name;filter_name;local;photo_size;cpu_time;upload_time;download_time;total_time;upload_size;download_size;");
+            writer.println("id;date;photo_name;filter_name;local;photo_size;cpu_time;upload_time;download_time;total_time;upload_size;download_size;battery_before;before_after;");
             for (ResultImage result : results) {
                 writer.print(result.getId() + ";");
                 writer.print(dateFormat.format(result.getDate()) + ";");
@@ -88,7 +88,9 @@ public final class ExportData extends AsyncTask<Void, Void, Void> {
                 writer.print(result.getRpcProfile().getDonwloadTime() + ";");
                 writer.print(result.getTotalTime() + ";");
                 writer.print(result.getRpcProfile().getUploadSize() + ";");
-                writer.println(result.getRpcProfile().getDownloadSize() + ";");
+                writer.print(result.getRpcProfile().getDownloadSize() + ";");
+                writer.print(result.getBatteryBefore() + ";");
+                writer.println(result.getBatteryAfter() + ";");
             }
 
             writer.close();
